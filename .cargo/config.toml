@@ -1,0 +1,4 @@
+[alias]
+sql-swarm-init = "run --locked -p bbgo-xtask -- sql-swarm-init"
+test-sql-swarm = "run --locked -p bbgo-xtask -- test-sql-swarm"
+test-sql-local = "run --locked -p bbgo-xtask -- test-sql-local"

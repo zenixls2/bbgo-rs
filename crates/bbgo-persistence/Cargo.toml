@@ -1,0 +1,20 @@
+[package]
+name = "bbgo-persistence"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.88"
+license.workspace = true
+
+[dependencies]
+bbgo-core.workspace = true
+bbgo-types.workspace = true
+async-trait.workspace = true
+sha2.workspace = true
+hex = "0.4"
+sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio-rustls", "any", "sqlite", "mysql", "postgres"] }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+
+[lints]
+workspace = true

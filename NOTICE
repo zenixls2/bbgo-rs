@@ -1,0 +1,10 @@
+bbgo-rs is a Rust migration derived from BBGO:
+https://github.com/c9s/bbgo
+Copyright belongs to the original BBGO authors and contributors for their work.
+
+The initial source reference is the local gamma-capture BBGO fork:
+https://github.com/zenixls2/gamma-capture
+commit d50c3747c0baf8087b9edac411f895faad022398
+
+Ports and adaptations are described in docs/MIGRATION.md.
+This distribution retains the GNU Affero General Public License version 3.

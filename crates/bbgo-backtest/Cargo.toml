@@ -1,0 +1,22 @@
+[package]
+name = "bbgo-backtest"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.88"
+license.workspace = true
+
+[dependencies]
+bbgo-core.workspace = true
+bbgo-types.workspace = true
+bbgo-replay = { path = "../bbgo-replay" }
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+rusqlite = { version = "0.32", features = ["bundled"] }
+sqlx = { version = "0.8.6", default-features = false, features = ["runtime-tokio-rustls", "any", "mysql", "postgres"] }
+
+[lints]
+workspace = true

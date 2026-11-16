@@ -1,0 +1,21 @@
+[package]
+name = "bbgo-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+bbgo-types.workspace = true
+serde.workspace = true
+async-trait.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+
+[dev-dependencies]
+futures = "0.3"
+
+[lints]
+workspace = true

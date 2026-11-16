@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS bbgo_checkpoints_v1 (
+    key_hash BINARY(32) PRIMARY KEY,
+    key_bytes VARBINARY(1024) NOT NULL,
+    version BIGINT NOT NULL CHECK(version=1),
+    payload MEDIUMBLOB NOT NULL CHECK(OCTET_LENGTH(payload)<=4194304),
+    digest BINARY(32) NOT NULL,
+    CHECK(OCTET_LENGTH(key_bytes) BETWEEN 1 AND 1024)
+) ENGINE=InnoDB;
