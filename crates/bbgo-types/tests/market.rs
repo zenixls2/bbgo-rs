@@ -43,15 +43,29 @@ fn normalize_filters_without_increasing_order_exposure() {
 }
 #[test]
 fn midpoint_rejects_invalid_quotes_and_avoids_sum_overflow() {
+    let (bid, ask, midpoint) = if Value::BACKEND == "dnum-16" {
+        (
+            "9.999999999999991e126",
+            "9.999999999999999e126",
+            "9.999999999999995e126",
+        )
+    } else {
+        (
+            "92233720368.54775805",
+            "92233720368.54775807",
+            "92233720368.54775806",
+        )
+    };
     let mut quote = Ticker {
         symbol: "BTCJPY".into(),
-        bid: Value::from_raw(i64::MAX - 2),
-        ask: Value::from_raw(i64::MAX),
+        bid: v(bid),
+        ask: v(ask),
         exchange_time: 0,
         receive_time: 0,
         generation: 1,
     };
-    assert_eq!(quote.midpoint().unwrap(), Value::from_raw(i64::MAX - 1));
+    assert!(quote.bid.checked_add(quote.ask).is_err());
+    assert_eq!(quote.midpoint().unwrap(), v(midpoint));
     quote.ask = Value::ONE;
     assert!(quote.midpoint().is_err());
     quote.bid = Value::ZERO;

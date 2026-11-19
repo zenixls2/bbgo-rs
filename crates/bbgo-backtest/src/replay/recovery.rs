@@ -25,10 +25,15 @@ pub(super) enum Action {
 #[serde(deny_unknown_fields)]
 struct Checkpoint {
     version: u32,
+    #[serde(default = "legacy_backend")]
+    numeric_backend: String,
     markets: BTreeMap<String, Market>,
     fee_rate: Value,
     seed: Ledger,
     actions: Vec<Action>,
+}
+fn legacy_backend() -> String {
+    "legacy-8".into()
 }
 impl ReplayExecutor {
     /// An atomic in-memory snapshot. Use FileStore for checksummed durable writes.
@@ -45,6 +50,7 @@ impl ReplayExecutor {
             ));
         }
         let bytes = serde_json::to_vec(&Checkpoint {
+            numeric_backend: Value::BACKEND.into(),
             version: if state.journal.iter().any(|action| {
                 matches!(
                     action,
@@ -101,6 +107,7 @@ impl ReplayExecutor {
             1
         };
         if checkpoint.version != expected_version
+            || checkpoint.numeric_backend != Value::BACKEND
             || checkpoint.markets != markets
             || checkpoint.seed != seed
             || checkpoint.fee_rate != fee_rate

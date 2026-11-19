@@ -8,8 +8,12 @@
 | `Model::Event` | `open_collector` over SQLite, MySQL or PostgreSQL | Recorded trade-print liquidity only; BBO never fills |
 
 Both use `bbgo-core::Strategy`, one `OrderExecutor`, reservations, FIFO orders,
-partial fills, cumulative quote fees and long-only account/PnL from `bbgo-replay`.
+partial fills, cumulative quote fees and long-only account/PnL from this package's
+`bbgo_backtest::replay` module. Replay is not a separate Cargo package.
 There is no live execution or CSV implementation.
+
+Use `bbgo_backtest::replay::{ReplayExecutor, TradePrint}` for the standalone
+matcher and [replay checkpoint contracts](REPLAY.md) for account recovery.
 
 ```rust,ignore
 let mut source = open_collector(

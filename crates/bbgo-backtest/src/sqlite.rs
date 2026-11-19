@@ -1,8 +1,8 @@
 //! Read-only adapter for BBGO's per-symbol capture schema v1, not CSV exports.
 //! Holds one SQLite read snapshot for the entire run. Use frozen copies for
 //! repeatable research; long reads against live WAL databases retain WAL pages.
+use crate::replay::TradePrint;
 use crate::{Model, source::*};
-use bbgo_replay::TradePrint;
 use bbgo_types::*;
 use rusqlite::{Connection, OpenFlags, params};
 use sha2::{Digest, Sha256};
@@ -233,7 +233,7 @@ ORDER BY a.available_at_ns,CASE e.stream WHEN 'bookticker' THEN 0 ELSE 1 END,e.i
                 if text.len() > 128 {
                     return Err(invalid("oversized decimal"));
                 }
-                text.parse().map_err(Error::from)
+                Value::parse_exact(&text).map_err(Error::from)
             };
             let tick = match stream.as_str() {
                 "bookticker" => {

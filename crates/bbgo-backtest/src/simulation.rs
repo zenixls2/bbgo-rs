@@ -1,10 +1,10 @@
+use crate::replay::{ReplayExecutor, TradePrint};
 use crate::{
     Model,
     source::{Frame, Input, Tick},
 };
 use async_trait::async_trait;
 use bbgo_core::OrderExecutor;
-use bbgo_replay::{ReplayExecutor, TradePrint};
 use bbgo_types::{accounting::Ledger, *};
 use std::{
     collections::{BTreeMap, BTreeSet},

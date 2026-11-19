@@ -3,6 +3,10 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        backend: [legacy, dnum]
+        profile: [dev, release]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -12,12 +16,41 @@ jobs:
       - run: bash -n scripts/test-sql-swarm.sh
       - run: python3 scripts/test_sql_swarm_script.py
       - run: python3 scripts/test_sql_local_script.py
-      - run: cargo test --workspace --locked
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - run: python3 scripts/test_build_tags.py
+      - name: Test numeric backend and optimization profile
+        run: |
+          flags=()
+          if [[ "${{ matrix.backend }}" == dnum ]]; then flags+=(--features dnum); fi
+          if [[ "${{ matrix.profile }}" == release ]]; then flags+=(--release); fi
+          cargo test --workspace --all-targets --locked "${flags[@]}"
+          cargo clippy --workspace --all-targets --locked "${flags[@]}" -- -D warnings
+  provider-sdks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        backend: [legacy, dnum]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: |
+          flags=(--features sdks,sdk-vendored-tls)
+          if [[ "${{ matrix.backend }}" == dnum ]]; then flags=(--all-features); fi
+          cargo test -p bbgo-provider --all-targets --locked "${flags[@]}"
+          cargo clippy -p bbgo-provider --all-targets --locked "${flags[@]}" -- -D warnings
   sql-backends:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        backend: [legacy, dnum]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo sql-swarm-init --advertise-addr 127.0.0.1
-      - run: cargo test-sql-swarm
+      - run: |
+          if [[ "${{ matrix.backend }}" == dnum ]]; then
+            cargo test-sql-swarm --features dnum
+          else
+            cargo test-sql-swarm
+          fi

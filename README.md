@@ -8,17 +8,16 @@ Public market-data access is read-only. There is no live order-submission path.
 
 | Package | Responsibility |
 | --- | --- |
-| `bbgo-fixedpoint` | Checked, finite eight-decimal values; string serialization; tick rounding |
+| `bbgo-fixedpoint` | Static `Decimal` trait; checked eight-decimal and 16-significant-digit dnum backends |
 | `bbgo-util` | Hashes, string helpers, nonce, resettable once, cancellable retries and pacing |
 | `bbgo-types` | Spot contracts, sequenced books, intervals, subscriptions, ledger, fees and position/PnL |
 | `bbgo-core` | Strategy/session lifecycle, cancellation, reconnect hooks, memory and atomic file checkpoints |
 | `bbgo-indicator` | Incremental SMA/EWMA and bounded rolling series |
-| `bbgo-replay` | Deterministic limit matching, FIFO liquidity, reservations, partial fills, accounting and journal recovery |
-| `bbgo-backtest` | Unified candle/tick strategy runner; SQLite/MySQL/PostgreSQL collector sources |
+| `bbgo-backtest` | Unified candle/tick runner, replay matching/accounting/recovery and SQLite/MySQL/PostgreSQL collector sources |
 | `bbgo-persistence` | Atomic versioned/checksummed SQLite/MySQL/PostgreSQL checkpoints |
 | `bbgo-model` | Feature/inference, training-job, artifact and third-party model integration interfaces |
 | `bbgo-xtask` | Cargo entry points for disposable database integration tests |
-| `bbgo-binance` | Read-only bounded HTTPS metadata/depth client and timestamped depth-event decoding |
+| `bbgo-provider` | Nine public spot adapters and opt-in signed private REST; discovery/BBO, limit orders/lookups/cancels, optional Rust SDKs |
 
 The dependency direction is `fixedpoint → types → core`. Utilities and indicators
 are independent of the engine. Service contracts use async traits; the supplied
@@ -30,10 +29,35 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets --locked -- -D warnings
 ```
 
-Rust 2024 edition. Binance/backtest/persistence dependency graphs require Rust 1.88 or newer;
+Rust 2024 edition. Provider/backtest/persistence dependency graphs require Rust 1.88 or newer;
 other packages declare 1.85. Verification currently uses Rust 1.97.1, not an
 independent minimum-supported-version build.
 Committed lockfiles pin dependency resolution.
+
+## Numeric backends and build flags
+
+The default `Value` is `Legacy` (signed 1e8 scale). The additive **`dnum`**
+Cargo feature switches that alias throughout the dependency graph to `Dnum`
+(16 significant digits, BBGO's coefficient/exponent arithmetic):
+
+```sh
+cargo test --workspace --all-targets --locked
+cargo test --workspace --all-targets --locked --features dnum
+cargo build --workspace --release --locked --features dnum
+cargo test-sql-swarm --features dnum
+```
+
+An application can use `bbgo-types = { ..., features = ["dnum"] }`, or enable the
+forwarded feature on core/backtest/provider/persistence/model. Both concrete
+types are also available together through `bbgo-fixedpoint::{Legacy, Dnum}`;
+`fn calculate<N: Decimal>(...)` is monomorphized, without trait objects.
+Cargo features unify: enabling `dnum` anywhere selects it for the whole graph.
+
+See [numeric semantics](crates/bbgo-fixedpoint/README.md) and the
+[Go build-flag coverage table](docs/BUILD_FLAGS.md). CI tests both numeric backends
+in dev/release profiles and both against native MySQL/PostgreSQL. Unmigrated Go
+web/profiling/strategy flags are explicitly recorded, not advertised as working
+Rust features.
 
 ## Gamma-capture
 
@@ -49,13 +73,33 @@ It contains JPY spot discovery, a causal logarithmic crossing engine, bounded
 intensity/Skellam/first-passage model ports, execution preflight gates and an
 observation-only strategy lifecycle with versioned grid/model checkpoints.
 The Go application is unchanged. The example is synthetic replay, not a
-profitability backtest. The separate `bbgo-replay` executor simulates fills;
+profitability backtest. The `bbgo_backtest::replay` executor simulates fills;
 the gamma example deliberately submits no orders.
 Replay executor recovery reconstructs account/orders from validated operations;
 an application must atomically coordinate those bytes with strategy state and
-the input cursor. See [replay recovery](crates/bbgo-replay/README.md).
+the input cursor. See [replay recovery](crates/bbgo-backtest/REPLAY.md).
 
 ## Backtesting
+
+Replay and backtesting belong to the same `bbgo-backtest` package:
+`bbgo_backtest::replay::{ReplayExecutor, TradePrint}` exposes the reusable
+matcher, while `bbgo_backtest::Backtest` runs complete strategies.
+
+## Exchange providers
+
+`bbgo-provider` groups Binance, Backpack, Bitfinex, Bitget, Bybit, Coinbase,
+KuCoin, MAX and OKX into provider submodules. `public_client(ProviderId)` provides
+a shared read-only spot discovery/BBO interface; missing exchange timestamps and
+execution filters are never invented. All eight new providers have optional
+Rust SDK dependencies/re-exports. `private_client` adds authenticated balances,
+GTC limit orders, open orders, lookups and cancel acknowledgments with explicit
+write opt-in, trusted filters and a per-order cap. Uncertain writes are not retried.
+Account/pagination limitations fail closed; private streams, durable live execution
+and production acceptance remain outstanding. An SDK dependency is not an
+execution adapter.
+See [provider contracts](crates/bbgo-provider/README.md).
+
+## Backtest sources
 
 `bbgo-backtest::Backtest::run` accepts the same strategy/services for both:
 
@@ -98,6 +142,7 @@ Golden vectors are generated from the original Go utility/model implementations:
 ```sh
 python3 tools/generate-util-fixtures.py
 python3 tools/generate-gamma-fixtures.py
+python3 tools/generate-fixedpoint-fixtures.py ../bbgo
 ```
 
 These require Go and the sibling source checkout. Ordinary Rust tests use the

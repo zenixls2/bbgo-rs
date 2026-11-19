@@ -127,6 +127,46 @@ impl<T: PublicTransport> MarketDataService for PublicClient<T> {
     }
 }
 
+#[async_trait]
+impl<T: PublicTransport> crate::public::SpotMarketDataService for PublicClient<T> {
+    async fn query_instruments(&self) -> Result<BTreeMap<String, crate::public::SpotInstrument>> {
+        Ok(self
+            .query_markets()
+            .await?
+            .into_iter()
+            .map(|(key, market)| {
+                (
+                    key,
+                    crate::public::SpotInstrument {
+                        symbol: market.symbol,
+                        base_currency: market.base_currency,
+                        quote_currency: market.quote_currency,
+                        trading: market.trading && market.spot_enabled,
+                        tick_size: Some(market.tick_size),
+                        step_size: Some(market.step_size),
+                        min_quantity: Some(market.min_quantity),
+                        max_quantity: Some(market.max_quantity),
+                        min_notional: Some(market.min_notional),
+                    },
+                )
+            })
+            .collect())
+    }
+    async fn query_book_ticker(&self, symbol: &str) -> Result<bbgo_types::BookTicker> {
+        let book = self.depth(symbol, 5).await?;
+        let received = crate::public::now()?;
+        let bid = book.best_bid().ok_or_else(|| invalid("empty bid side"))?;
+        let ask = book.best_ask().ok_or_else(|| invalid("empty ask side"))?;
+        crate::public::quote(
+            symbol,
+            [bid.price, bid.quantity, ask.price, ask.quantity],
+            None,
+            received,
+            0,
+        )
+    }
+}
+
 #[derive(Deserialize)]
 struct ExchangeInfo {
     symbols: Vec<Symbol>,
@@ -144,12 +184,13 @@ struct Symbol {
     filters: Vec<serde_json::Value>,
 }
 fn decimal(filter: &serde_json::Value, key: &str) -> Result<Value> {
-    filter
-        .get(key)
-        .and_then(serde_json::Value::as_str)
-        .ok_or_else(|| invalid("missing decimal filter"))?
-        .parse()
-        .map_err(Error::from)
+    Value::parse_exact(
+        filter
+            .get(key)
+            .and_then(serde_json::Value::as_str)
+            .ok_or_else(|| invalid("missing decimal filter"))?,
+    )
+    .map_err(Error::from)
 }
 pub fn decode_markets(body: &[u8]) -> Result<BTreeMap<String, Market>> {
     bounded(body)?;

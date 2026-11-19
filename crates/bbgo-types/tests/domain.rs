@@ -116,7 +116,11 @@ fn base_fees_and_final_basis_dust() {
     );
     assert_eq!(
         multiply_ceil(v("0.00000001"), v("0.001")).unwrap(),
-        v("0.00000001")
+        v(if Value::BACKEND == "dnum-16" {
+            "0.00000000001"
+        } else {
+            "0.00000001"
+        })
     );
 }
 #[test]

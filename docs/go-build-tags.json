@@ -1,0 +1,539 @@
+{
+  "decisions": {
+    "dnum": "implemented: Decimal trait + Legacy/Dnum; Cargo feature dnum; numeric CI matrix",
+    "release": "partial: Cargo dev/release profiles tested; Go version/CLI package not migrated",
+    "debug": "not migrated: tri strategy debug hooks (not a numeric backend flag)",
+    "web": "not migrated: embedded backtest/server web assets and UI",
+    "pprof": "not migrated: Go runtime profiling HTTP endpoint; no no-op Rust feature",
+    "race": "Go toolchain race detector selection; Rust concurrency tests are not detector parity",
+    "go1.18": "Go language-version compatibility shims; one Rust implementation, MSRV declared separately",
+    "unix": "not migrated: collector process signal handlers; reusable Rust libraries have no collector binary",
+    "ignore": "excluded upstream: code generators and research files; not shipped runtime functionality"
+  },
+  "files": [
+    {
+      "path": "cmd/gammacapture-capture/capture_signal_other.go",
+      "constraints": [
+        "//go:build !unix"
+      ],
+      "tags": [
+        "unix"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-capture/capture_signal_unix.go",
+      "constraints": [
+        "//go:build unix"
+      ],
+      "tags": [
+        "unix"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-capture/capture_signal_unix_test.go",
+      "constraints": [
+        "//go:build unix"
+      ],
+      "tags": [
+        "unix"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-mm-research/multiscale_regime_outcome.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-mm-research/multiscale_regime_outcome_test.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-mm-research/multiscale_regime_study.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-mm-research/multiscale_regime_study_test.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "cmd/gammacapture-mm-research/quantity_bocpd_replay.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/backtest/assets_dummy.go",
+      "constraints": [
+        "//go:build !web"
+      ],
+      "tags": [
+        "web"
+      ]
+    },
+    {
+      "path": "pkg/bbgo/config_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/cmd/pprof.go",
+      "constraints": [
+        "//go:build pprof"
+      ],
+      "tags": [
+        "pprof"
+      ]
+    },
+    {
+      "path": "pkg/datasource/csvsource/csv_kline_reader_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/datasource/csvsource/csv_tick_reader_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/depth/buffer_test.go",
+      "constraints": [
+        "//go:build !race"
+      ],
+      "tags": [
+        "race"
+      ]
+    },
+    {
+      "path": "pkg/exchange/bitfinex/bfxapi/websocket_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/exchange/bitfinex/generate_symbol_map.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/exchange/coinbase/generate_symbol_map.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/exchange/kucoin/generate_symbol_map.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/exchange/okex/gensymbols.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/convert.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/dec.go",
+      "constraints": [
+        "//go:build dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/dec_dnum_test.go",
+      "constraints": [
+        "//go:build dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/dec_legacy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/div128.go",
+      "constraints": [
+        "//go:build dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/fixedpoint/expirable_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/server/asset_fs.go",
+      "constraints": [
+        "//go:build web"
+      ],
+      "tags": [
+        "web"
+      ]
+    },
+    {
+      "path": "pkg/server/assets_dummy.go",
+      "constraints": [
+        "//go:build !web"
+      ],
+      "tags": [
+        "web"
+      ]
+    },
+    {
+      "path": "pkg/strategy/gammacapture/hawkes_direction.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/strategy/gammacapture/hawkes_direction_test.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/strategy/gammacapture/quantity_bocpd.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/strategy/gammacapture/quantity_bocpd_test.go",
+      "constraints": [
+        "//go:build ignore"
+      ],
+      "tags": [
+        "ignore"
+      ]
+    },
+    {
+      "path": "pkg/strategy/grid2/backtest_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/grid2/grid_dnum_test.go",
+      "constraints": [
+        "//go:build dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/grid2/grid_int64_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/grid2/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/liquiditymaker/generator_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/tradingdesk/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/tri/debug.go",
+      "constraints": [
+        "//go:build debug"
+      ],
+      "tags": [
+        "debug"
+      ]
+    },
+    {
+      "path": "pkg/strategy/tri/debug_null.go",
+      "constraints": [
+        "//go:build !debug"
+      ],
+      "tags": [
+        "debug"
+      ]
+    },
+    {
+      "path": "pkg/strategy/tri/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xalign/slack_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xalign/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xdepthmaker/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xhedgegrid/backtest_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xhedgegrid/grid_dnum_test.go",
+      "constraints": [
+        "//go:build dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xhedgegrid/grid_int64_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xhedgegrid/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xmaker/bestpricehedge_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xmaker/hedgemarket_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xmaker/splithedge_balance_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xmaker/splithedge_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/strategy/xmaker/strategy_test.go",
+      "constraints": [
+        "//go:build !dnum"
+      ],
+      "tags": [
+        "dnum"
+      ]
+    },
+    {
+      "path": "pkg/util/pointer.go",
+      "constraints": [
+        "//go:build !go1.18"
+      ],
+      "tags": [
+        "go1.18"
+      ]
+    },
+    {
+      "path": "pkg/util/pointer_18.go",
+      "constraints": [
+        "//go:build go1.18"
+      ],
+      "tags": [
+        "go1.18"
+      ]
+    },
+    {
+      "path": "pkg/util/trylock.go",
+      "constraints": [
+        "//go:build !go1.18"
+      ],
+      "tags": [
+        "go1.18"
+      ]
+    },
+    {
+      "path": "pkg/util/trylock_18.go",
+      "constraints": [
+        "//go:build go1.18"
+      ],
+      "tags": [
+        "go1.18"
+      ]
+    },
+    {
+      "path": "pkg/version/dev.go",
+      "constraints": [
+        "//go:build !release",
+        "// +build !release"
+      ],
+      "tags": [
+        "release"
+      ]
+    },
+    {
+      "path": "pkg/version/version.go",
+      "constraints": [
+        "//go:build release",
+        "// +build release"
+      ],
+      "tags": [
+        "release"
+      ]
+    }
+  ]
+}

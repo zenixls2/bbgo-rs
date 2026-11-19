@@ -1,5 +1,6 @@
 //! One offline runner, with distinct candle-simulation and recorded-tick models.
 //! Sources never submit orders. Both models share reservations/accounting.
+pub mod replay;
 pub mod simulation;
 pub mod source;
 pub mod sql;

@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[features]
+default = []
+dnum = ["bbgo-types/dnum"]
+
 [dependencies]
 bbgo-core.workspace = true
 bbgo-types.workspace = true

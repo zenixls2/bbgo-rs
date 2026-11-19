@@ -155,7 +155,7 @@ async fn malformed_payload_is_not_rounded_or_silently_skipped() {
     connection.execute("INSERT INTO capture_event_availability VALUES(?1,'capture_service',8000000000,'collector_callback_receive','observed')", [seq]).unwrap();
     connection
         .execute(
-            "INSERT INTO capture_bookticker VALUES(?1,'99.000000001','1','101','1')",
+            "INSERT INTO capture_bookticker VALUES(?1,'99.000000000000001','1','101','1')",
             [seq],
         )
         .unwrap();

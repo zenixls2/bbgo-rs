@@ -1,11 +1,11 @@
 //! Native MySQL/PostgreSQL collector sources plus database-independent factory.
 //! Readers never create/migrate tables. See schemas/ for the native v1 contract.
+use crate::replay::TradePrint;
 use crate::{
     Model,
     source::*,
     sqlite::{SqlTickSource, Window},
 };
-use bbgo_replay::TradePrint;
 use bbgo_types::*;
 use sqlx::{
     Any, AnyPool, Row, Transaction,
@@ -278,7 +278,7 @@ impl ServerTickSource {
                 if text.len() > 128 {
                     return Err(invalid("oversized decimal"));
                 }
-                text.parse().map_err(Error::from)
+                Value::parse_exact(&text).map_err(Error::from)
             };
             let tick = match stream.as_str() {
                 "bookticker" => {

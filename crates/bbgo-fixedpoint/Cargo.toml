@@ -5,9 +5,15 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 
+[features]
+default = []
+dnum = []
+
 [dependencies]
 serde.workspace = true
 thiserror.workspace = true
+num-bigint = "0.4"
+num-traits = "0.2"
 
 [dev-dependencies]
 serde_json.workspace = true

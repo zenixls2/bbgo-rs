@@ -1,7 +1,9 @@
 //! Synthetic Binance wire fixtures; these are not claimed to be captured traffic.
 use async_trait::async_trait;
-use bbgo_binance::{PublicClient, PublicTransport, decode_depth, decode_markets, decode_snapshot};
-use bbgo_types::{MarketDataService, Result};
+use bbgo_provider::binance::{
+    PublicClient, PublicTransport, decode_depth, decode_markets, decode_snapshot,
+};
+use bbgo_types::{MarketDataService, Result, Value};
 
 const MARKETS: &[u8] = br#"{"symbols":[{
  "symbol":"BTCJPY","status":"TRADING","baseAsset":"BTC","quoteAsset":"JPY",
@@ -26,10 +28,8 @@ impl PublicTransport for FixtureTransport {
                 Ok(MARKETS.to_vec())
             }
             "/api/v3/depth" => {
-                assert_eq!(
-                    parameters,
-                    &[("symbol", "BTCJPY".into()), ("limit", "100".into())]
-                );
+                assert_eq!(parameters[0], ("symbol", "BTCJPY".into()));
+                assert!(matches!(parameters[1].1.as_str(), "5" | "100"));
                 Ok(SNAPSHOT.to_vec())
             }
             _ => panic!("unexpected path"),
@@ -51,6 +51,18 @@ async fn metadata_transport_and_untimed_quote_rejection() {
     assert!(client.depth("../BTC", 100).await.is_err());
     assert!(client.depth("BTCJPY", 99).await.is_err());
     assert!(client.query_ticker("BTCJPY").await.is_err());
+    let service: &dyn bbgo_provider::public::SpotMarketDataService = &client;
+    let instruments = service.query_instruments().await.unwrap();
+    assert_eq!(
+        instruments["BTCJPY"].min_notional,
+        Some(market.min_notional)
+    );
+    let quote = service.query_book_ticker("BTCJPY").await.unwrap();
+    assert_eq!(quote.bid.to_string(), "100");
+    assert_eq!(quote.ask.to_string(), "102");
+    assert_eq!(quote.bid_quantity.to_string(), "2");
+    assert_eq!(quote.exchange_time, None);
+    assert!(quote.receive_time > 0);
 }
 
 #[test]
@@ -78,6 +90,14 @@ fn synchronized_depth_produces_causal_quotes_and_fails_on_gap() {
 
 #[test]
 fn rejects_malformed_precision_crossed_books_and_metadata() {
+    assert_eq!(
+        decode_snapshot(
+            "BTCJPY",
+            br#"{"lastUpdateId":1,"bids":[["100","0.000000001"]],"asks":[]}"#
+        )
+        .is_ok(),
+        Value::BACKEND == "dnum-16"
+    );
     assert!(
         decode_snapshot(
             "BTCJPY",
@@ -88,7 +108,7 @@ fn rejects_malformed_precision_crossed_books_and_metadata() {
     assert!(
         decode_snapshot(
             "BTCJPY",
-            br#"{"lastUpdateId":1,"bids":[["100","0.000000001"]],"asks":[]}"#
+            br#"{"lastUpdateId":1,"bids":[["100","0.000000000000000012345678901234567"]],"asks":[]}"#
         )
         .is_err()
     );

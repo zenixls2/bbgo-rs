@@ -1,5 +1,5 @@
+use bbgo_backtest::replay::{self, ReplayExecutor, TradePrint};
 use bbgo_core::OrderExecutor;
-use bbgo_replay::{ReplayExecutor, TradePrint};
 use bbgo_types::{accounting::Ledger, *};
 use futures::executor::block_on;
 use std::collections::BTreeMap;
@@ -240,6 +240,22 @@ fn recovered(bytes: &[u8]) -> Result<ReplayExecutor> {
 }
 
 #[test]
+fn recovery_requires_matching_numeric_backend() {
+    let original = setup("1000");
+    let mut data: serde_json::Value =
+        serde_json::from_slice(&original.checkpoint().unwrap()).unwrap();
+    assert_eq!(data["numeric_backend"], Value::BACKEND);
+    data["numeric_backend"] = "unknown".into();
+    assert!(recovered(&serde_json::to_vec(&data).unwrap()).is_err());
+    // Historical v1/v2 checkpoints were eight-decimal only.
+    data.as_object_mut().unwrap().remove("numeric_backend");
+    assert_eq!(
+        recovered(&serde_json::to_vec(&data).unwrap()).is_ok(),
+        Value::BACKEND == "legacy-8"
+    );
+}
+
+#[test]
 fn recovery_preserves_fifo_partial_reservations_fees_ids_and_pnl() {
     block_on(async {
         let original = setup("1000");
@@ -355,11 +371,11 @@ fn recovery_rejects_bad_config_account_and_impossible_history() {
         let mut excessive: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
         excessive["actions"] = serde_json::json!(vec![
             excessive["actions"][0].clone();
-            bbgo_replay::MAX_RECOVERY_ACTIONS + 1
+            replay::MAX_RECOVERY_ACTIONS + 1
         ]);
         assert!(recovered(&serde_json::to_vec(&excessive).unwrap()).is_err());
         assert!(recovered(b"{").is_err());
-        assert!(recovered(&vec![b' '; bbgo_replay::MAX_CHECKPOINT_BYTES + 1]).is_err());
+        assert!(recovered(&vec![b' '; replay::MAX_CHECKPOINT_BYTES + 1]).is_err());
         assert_eq!(executor.checkpoint().unwrap(), bytes);
     });
 }

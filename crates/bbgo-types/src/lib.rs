@@ -112,6 +112,8 @@ pub struct SubmitOrder {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum OrderStatus {
+    /// Submission acknowledged, but resting/fill state has not been observed.
+    Pending,
     New,
     PartiallyFilled,
     Filled,
@@ -241,6 +243,13 @@ pub trait TradeService: Send + Sync {
     async fn submit_order(&self, order: SubmitOrder) -> Result<Order>;
     async fn query_open_orders(&self, symbol: &str) -> Result<Vec<Order>>;
     async fn cancel_orders(&self, orders: &[Order]) -> Result<()>;
+}
+/// Authenticated lookup used to reconcile an uncertain submission/cancellation.
+/// Not-found is an error, never proof that a timed-out write did not execute.
+#[async_trait]
+pub trait OrderQueryService: Send + Sync {
+    async fn query_order(&self, symbol: &str, order_id: &str) -> Result<Order>;
+    async fn query_order_by_client_id(&self, symbol: &str, client_order_id: &str) -> Result<Order>;
 }
 pub trait Exchange: MarketDataService + AccountService + TradeService {
     fn name(&self) -> &str;

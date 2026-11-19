@@ -1,5 +1,5 @@
 use crate::Model;
-use bbgo_replay::TradePrint;
+use crate::replay::TradePrint;
 use bbgo_types::*;
 use serde::{Deserialize, Serialize};
 

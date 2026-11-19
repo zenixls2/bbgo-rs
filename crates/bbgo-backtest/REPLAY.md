@@ -1,4 +1,9 @@
-# bbgo-replay
+# Replay execution (`bbgo_backtest::replay`)
+
+The `dnum` Cargo feature forwards the workspace numeric selection. Checkpoints
+record `numeric_backend`; unlabelled historical checkpoints are legacy-only.
+Recovery rejects a different selected backend rather than replaying identical
+decimal strings with different arithmetic. See [numeric semantics](../bbgo-fixedpoint/README.md).
 
 Deterministic offline, long-only spot limit matching. No credentials, network or
 live-order path. Public prints allocate liquidity in order-acceptance FIFO;

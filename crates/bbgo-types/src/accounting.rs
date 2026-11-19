@@ -8,12 +8,7 @@ pub fn multiply_ceil(a: Value, b: Value) -> Result<Value> {
     if a < Value::ZERO || b < Value::ZERO {
         return Err(Error::Invalid("negative rounded product".into()));
     }
-    let scale = i128::from(bbgo_fixedpoint::SCALE);
-    let product = i128::from(a.raw()) * i128::from(b.raw());
-    let raw = (product + scale - 1) / scale;
-    Ok(Value::from_raw(
-        i64::try_from(raw).map_err(|_| Error::Invalid("product overflow".into()))?,
-    ))
+    Ok(a.checked_mul_ceil(b)?)
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -71,11 +66,7 @@ impl Position {
                 let basis = if disposed == self.quantity {
                     self.cost_basis
                 } else {
-                    let raw = i128::from(self.cost_basis.raw()) * i128::from(disposed.raw())
-                        / i128::from(self.quantity.raw());
-                    Value::from_raw(
-                        i64::try_from(raw).map_err(|_| Error::Invalid("basis overflow".into()))?,
-                    )
+                    self.cost_basis.checked_mul_div(disposed, self.quantity)?
                 };
                 self.realized_pnl = self
                     .realized_pnl

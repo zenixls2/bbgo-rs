@@ -1,0 +1,51 @@
+[package]
+name = "bbgo-provider"
+version.workspace = true
+edition.workspace = true
+rust-version = "1.88"
+license.workspace = true
+
+[features]
+default = []
+dnum = ["bbgo-types/dnum"]
+sdk-backpack = ["dep:bpx-api-client"]
+sdk-bitfinex = ["dep:bfx"]
+sdk-bitget = ["dep:bitget_sdk"]
+sdk-bybit = ["dep:rs_bybit"]
+sdk-coinbase = ["dep:coinbase-pro-rs"]
+sdk-kucoin = ["dep:kucoin_rs"]
+sdk-max = ["dep:maicoin_max"]
+sdk-okx = ["dep:rust-okx"]
+sdks = ["sdk-backpack", "sdk-bitfinex", "sdk-bitget", "sdk-bybit", "sdk-coinbase", "sdk-kucoin", "sdk-max", "sdk-okx"]
+sdk-vendored-tls = ["dep:openssl"]
+
+[dependencies]
+bbgo-types.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["arbitrary_precision"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+hmac = "0.12"
+sha2.workspace = true
+base64 = "0.22"
+hex = "0.4"
+zeroize = "1"
+ed25519-dalek = { version = "2", features = ["zeroize"] }
+time = { version = "0.3", features = ["formatting"] }
+form_urlencoded = "1"
+tokio.workspace = true
+bpx-api-client = { version = "0.23.0", optional = true, default-features = false }
+bfx = { version = "0.2.0", optional = true, default-features = false }
+bitget_sdk = { version = "0.1.1", optional = true }
+rs_bybit = { version = "0.4.6", optional = true }
+coinbase-pro-rs = { version = "0.8.1", optional = true }
+kucoin_rs = { version = "0.4.4", optional = true }
+maicoin_max = { version = "2.1.1", optional = true }
+rust-okx = { version = "0.6.5", optional = true, default-features = false, features = ["reqwest"] }
+openssl = { version = "0.10", optional = true, features = ["vendored"] }
+
+[dev-dependencies]
+tokio.workspace = true
+
+[lints]
+workspace = true
